@@ -1,29 +1,41 @@
-name: CI/CD Go-Notes
+name: Go Notes CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  ci:
-    name: Continuous Integration
+  # --- JOB 1: CI (Continuous Integration) ---
+  ci-stage:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout do código
         uses: actions/checkout@v4
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Setup do ambiente Go
+        uses: actions/setup-go@v4
         with:
-          go-version: '1.22'
+          go-version: '1.21'
 
-      - name: Download dependencies
-        run: go mod tidy
+      - name: Compilar Aplicação (Build)
+        run: go build -v -o go-notes main.go
 
-      - name: Build application
-        run: go build -v ./...
+      - name: Executar Testes Unitários
+        run: go test -v ./...
 
-      - name: Run tests
-        run: go test ./...
+  # --- JOB 2: CD (Continuous Deployment) ---
+  cd-stage:
+    needs: ci-stage # Só corre se o CI passar
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/go-notes
+            chmod +x deploy.sh
+            ./deploy.sh
