@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  # --- JOB 1: CI (Continuous Integration) ---
+  # --- ETAPA 1: CI (Continuous Integration) ---
   ci-stage:
     runs-on: ubuntu-latest
     steps:
@@ -17,28 +17,35 @@ jobs:
         with:
           go-version: '1.21'
 
+      # Resolve o erro de falta de módulos
       - name: Instalar dependências
-        run: go mod download
+        run: |
+          go mod download
+          go mod tidy
 
+      # Resolve os erros de "undefined" ao compilar o diretório completo
       - name: Compilar Aplicação (Build)
         run: go build -v -o go-notes .
 
       - name: Executar Testes Unitários
         run: go test -v ./...
 
-  # --- JOB 2: CD (Continuous Deployment) ---
+  # --- ETAPA 2: CD (Continuous Deployment) ---
   cd-stage:
-    needs: ci-stage # Só corre se o CI passar
+    needs: ci-stage # Só inicia se o CI passar com sucesso
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    
     steps:
-      - name: Deploy via SSH
+      - name: Deploy via SSH para a VM
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # O script abaixo corre dentro da tua VM
           script: |
             cd ~/go-notes
-            chmod +x deploy.sh
-            ./deploy.sh
+            git pull origin main
+            go build -o go-notes .
+            sudo systemctl restart go-notes.service
