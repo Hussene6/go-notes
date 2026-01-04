@@ -16,14 +16,15 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
+          cache: true # Ajuda a evitar erros de download
 
-      # Resolve o erro de falta de módulos
+      # Corrigido: go mod download sem argumentos precisa do ficheiro go.mod presente
       - name: Instalar dependências
         run: |
-          go mod download
           go mod tidy
+          go mod download
 
-      # Resolve os erros de "undefined" ao compilar o diretório completo
+      # Compilar o diretório completo (.)
       - name: Compilar Aplicação (Build)
         run: go build -v -o go-notes .
 
@@ -32,7 +33,7 @@ jobs:
 
   # --- ETAPA 2: CD (Continuous Deployment) ---
   cd-stage:
-    needs: ci-stage # Só inicia se o CI passar com sucesso
+    needs: ci-stage
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
@@ -43,7 +44,6 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          # O script abaixo corre dentro da tua VM
           script: |
             cd ~/go-notes
             git pull origin main
