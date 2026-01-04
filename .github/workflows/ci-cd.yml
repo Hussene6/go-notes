@@ -1,0 +1,29 @@
+name: CI/CD Go-Notes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Download dependencies
+        run: go mod tidy
+
+      - name: Build application
+        run: go build -v ./...
+
+      - name: Run tests
+        run: go test ./...
