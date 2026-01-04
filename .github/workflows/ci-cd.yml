@@ -6,7 +6,7 @@ on:
 
 jobs:
   # --- ETAPA 1: CI (Continuous Integration) ---
-  ci-stage:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout do código
@@ -36,22 +36,14 @@ jobs:
         run: go test -v ./... || echo "Sem testes para executar"
 
   # --- ETAPA 2: CD (Continuous Deployment) ---
-  cd-stage:
-    needs: ci-stage
+  cd:
+    name: Continuous Deployment
+    needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
+
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~/go-notes
-            git pull origin main
-            # Compilação conforme o README
-            go build -o go-notes-app .
-            # Reinicia o serviço (ajuste o nome do binário no seu .service se necessário)
-            sudo systemctl restart go-notes.service
+      - name: Deployment step
+        run: |
+          echo "Deployment configurado com sucesso."
+          echo "Execução automática não realizada devido a limitações de conectividade com a VM."
+          echo "O deployment é efetuado manualmente através do script deploy.sh no servidor."
