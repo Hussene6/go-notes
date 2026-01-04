@@ -1,0 +1,24 @@
+
+:80 {
+	header {
+	   X-SERVIDO-POR "go-notes"
+	   X-Frame-Options "DENY"
+	   X-Content_Type_Options "nosniff"
+	}
+
+	root * /var/www/go-notes
+	file_server
+	
+	handle /app* {
+		reverse_proxy app:8080
+	}
+
+	handle /db-admin* {
+		reverse_proxy adminer:8080
+	}
+
+	handle /static* {
+		reverse_proxy app:8080
+	}
+
+}
