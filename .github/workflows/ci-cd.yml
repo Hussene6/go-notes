@@ -21,8 +21,13 @@ jobs:
       # Corrigido: go mod download sem argumentos precisa do ficheiro go.mod presente
       - name: Instalar dependências
         run: |
+          go mod init go-notes
+          go get github.com/gofiber/fiber/v2
+          go get github.com/gofiber/template/html/v2
+          go get github.com/jackc/pgx/v5
+          go get golang.org/x/crypto/bcrypt
           go mod tidy
-          go mod download
+
 
       # Compilar o diretório completo (.)
       - name: Compilar Aplicação (Build)
