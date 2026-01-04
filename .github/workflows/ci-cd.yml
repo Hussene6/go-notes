@@ -21,6 +21,11 @@ jobs:
       - name: Inicializar e Instalar Dependências
         run: |
           # Se o go.mod não existir no repo, ele cria. Se existir, ele apenas limpa.
+          go mod init go-notes
+          go get github.com/gofiber/fiber/v2
+          go get github.com/gofiber/template/html/v2
+          go get github.com/jackc/pgx/v5
+          go get golang.org/x/crypto/bcrypt
           go mod tidy
 
       - name: Compilar Aplicação (Build)
