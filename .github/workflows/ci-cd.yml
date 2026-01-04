@@ -18,7 +18,7 @@ jobs:
           go-version: '1.21'
 
       - name: Instalar dependências
-        run: go mod tidy # Garante que os módulos (Fiber, etc) são baixados
+        run: go mod download
 
       - name: Compilar Aplicação (Build)
         run: go build -v -o go-notes .
